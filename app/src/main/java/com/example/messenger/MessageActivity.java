@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+
 public class MessageActivity extends AppCompatActivity {
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
@@ -64,7 +65,6 @@ public class MessageActivity extends AppCompatActivity {
     TextView textView;
     ImageView imageView;
 
-    RecyclerView recyclerView;
     EditText messageEditText;
     ImageButton sendButton;
 
@@ -72,8 +72,6 @@ public class MessageActivity extends AppCompatActivity {
     FirebaseUser firebaseUser;
     DatabaseReference databaseReference;
     Intent intent;
-    FirebaseStorage firebaseStorage;
-    StorageReference storageReference;
     MessageAdapter messageAdapter;
     List<Chat> mChat;
 
@@ -86,30 +84,11 @@ public class MessageActivity extends AppCompatActivity {
     MediaRecorder mediaRecorder;
     private String audioPath;
 
-//    // Requesting permission to RECORD_AUDIO
-//    private boolean permissionToRecordAccepted = false;
-//    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
-//
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        switch (requestCode){
-//            case REQUEST_RECORD_AUDIO_PERMISSION:
-//                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-//                break;
-//        }
-//        if (!permissionToRecordAccepted ) finish();
-//
-//    }
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
-
-        //ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-
 
         imageView = findViewById(R.id.ProfileImageView);
         textView = findViewById(R.id.username);
@@ -120,7 +99,6 @@ public class MessageActivity extends AppCompatActivity {
         //recording voice messages
         recordView = findViewById(R.id.record_view);
         recordButton = findViewById(R.id.record_button);
-
 
         //chatRecyclerView
         chatRecyclerView = findViewById(R.id.recyclerView2);
@@ -146,7 +124,6 @@ public class MessageActivity extends AppCompatActivity {
         userid = intent.getStringExtra("userid");
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         databaseReference = FirebaseDatabase.getInstance().getReference("MyUsers").child(userid);
-        //storageReference = FirebaseStorage.getInstance().getReference();
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -356,7 +333,6 @@ public class MessageActivity extends AppCompatActivity {
 
 
                 sendRecordingMessage(firebaseUser.getUid(), userid, audioPath, "RECORDING");
-
             }
 
             @Override
@@ -393,5 +369,4 @@ public class MessageActivity extends AppCompatActivity {
         audioPath = file.getAbsolutePath() + File.separator + System.currentTimeMillis() + ".3gp";
         mediaRecorder.setOutputFile(audioPath);
     }
-
 }
