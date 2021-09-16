@@ -145,7 +145,7 @@ public class MessageActivity extends AppCompatActivity {
         userid = intent.getStringExtra("userid");
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         databaseReference = FirebaseDatabase.getInstance().getReference("MyUsers").child(userid);
-        storageReference = FirebaseStorage.getInstance().getReference();
+        //storageReference = FirebaseStorage.getInstance().getReference();
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -185,7 +185,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     private void sendRecordingMessage(String sender, String receiver, String audioPath, String type){
-        StorageReference filePath = storageReference.child(audioPath);
+        StorageReference filePath = FirebaseStorage.getInstance().getReference("/Records/");
         Uri audioFile = Uri.fromFile(new File(audioPath));
         filePath.putFile(audioFile).addOnSuccessListener(taskSnapshot -> {
             Task<Uri> audioUrl = taskSnapshot.getStorage().getDownloadUrl();
@@ -383,11 +383,10 @@ public class MessageActivity extends AppCompatActivity {
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
 
-        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "CHatApp/Media/Recording");
-        if(file.exists()){
+        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
+        if(!file.exists()){
             file.mkdirs();
         }
-        System.out.println();
         audioPath = file.getAbsolutePath() + File.separator + System.currentTimeMillis() + ".3gp";
         mediaRecorder.setOutputFile(audioPath);
     }
