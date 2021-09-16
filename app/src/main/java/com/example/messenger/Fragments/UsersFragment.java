@@ -2,7 +2,6 @@ package com.example.messenger.Fragments;
 
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,16 +11,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 //import com.example.messenger.Adapter.UserAdapter;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.messenger.Adapter.UserAdapter;
+import com.example.messenger.MainActivity;
 import com.example.messenger.Model.Users;
 import com.example.messenger.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,13 +35,16 @@ public class UsersFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private UserAdapter userAdapter;
-    private List<Users> mUsers;
+    private List<Users> mUsers = new ArrayList<>();;
+    private Users loggedUser;
 
     public UsersFragment() {
         // Required empty public constructor
     }
 
-
+    public UsersFragment(Users loggedUser) {
+        this.loggedUser = loggedUser;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,39 +55,57 @@ public class UsersFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        mUsers = new ArrayList<>();
 
-        ReadUsers();
         return view;
         //return inflater.inflate(R.layout.fragment_users,container,false);
     }
 
-    private void ReadUsers(){
-        final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("MyUsers");
+    /**
+     * Called when the fragment is visible to the user and actively running.
+     * This is generally
+     * tied to  of the containing
+     * Activity's lifecycle.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        System.out.println("UserFragment resumed");
+        readUsers();
+    }
 
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                mUsers.clear();
+    private void readUsers(){
+        mUsers.clear();
+        volleyGetUsers(MainActivity.API_URL+ "/api/user-all");
+    }
 
-                for(DataSnapshot snapshot1: snapshot.getChildren()){
-                    Users user = snapshot1.getValue(Users.class);
+    private void volleyGetUsers(String getUrl) {
 
-                    assert  user != null;
-                    if(!user.getId().equals(firebaseUser.getUid())){
-                        mUsers.add(user);
+        RequestQueue requestQueue = Volley.newRequestQueue(requireContext());
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, getUrl, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            for(int i = 0; i < response.length(); i++){
+                                JSONObject jsonObject = response.getJSONObject(i);
+                                final Users user = new Users(
+                                        jsonObject.getString("id"),
+                                        jsonObject.getString("name"),
+                                        jsonObject.getString("imageURL"));
+
+                                mUsers.add(user);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        mUsers.remove(loggedUser);
+                        userAdapter = new UserAdapter(getContext(), mUsers);
+                        recyclerView.setAdapter(userAdapter);
                     }
+                },
+                error -> error.printStackTrace());
 
-                    userAdapter = new UserAdapter(getContext(), mUsers);
-                    recyclerView.setAdapter(userAdapter);
-                }
-            }
+        requestQueue.add(jsonArrayRequest);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 }
