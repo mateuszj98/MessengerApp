@@ -1,5 +1,11 @@
 package com.example.messenger;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,31 +14,27 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.Toast;
-
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.messenger.Fragments.ChatsFragment;
 import com.example.messenger.Fragments.UsersFragment;
 import com.example.messenger.Model.Users;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String API_URL = "https://messenger-backend2137.herokuapp.com";
     //Firebase
     FirebaseUser firebaseUser;
-    DatabaseReference dbRef;
+    Users user = new Users();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,20 +42,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        dbRef = FirebaseDatabase.getInstance().getReference("MyUsers").child(firebaseUser.getUid());
-
-        dbRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Users users = snapshot.getValue(Users.class);
-                Toast.makeText(MainActivity.this,"User Login: " + users.getUsername(), Toast.LENGTH_SHORT).show();    //ODZNACZYC!!!!!!!!!!!!!!!
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        assert firebaseUser != null;
+        volleyGetUser(MainActivity.API_URL + "/api/user", firebaseUser.getUid());
 
         //Tab Layout and viewPager
         TabLayout tabLayout = findViewById(R.id.tabLayout);
@@ -79,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.logout:
                 FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
@@ -90,11 +80,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Class ViewPagerAdapter
-    class ViewPagerAdapter extends FragmentPagerAdapter{
+    class ViewPagerAdapter extends FragmentPagerAdapter {
         private ArrayList<Fragment> fragments;
         private ArrayList<String> titles;
 
-        ViewPagerAdapter(FragmentManager fm){
+        ViewPagerAdapter(FragmentManager fm) {
             super(fm);
             this.fragments = new ArrayList<>();
             this.titles = new ArrayList<>();
@@ -113,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
             return fragments.size();
         }
 
-        public void addFragment(Fragment fragment, String title){
+        public void addFragment(Fragment fragment, String title) {
             fragments.add(fragment);
             titles.add(title);
         }
@@ -123,5 +113,27 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             return titles.get(position);
         }
+    }
+
+    private void volleyGetUser(String getUrl, String parameter) {
+        String parameters = String.format("?id=%1$s", parameter);
+        getUrl += parameters;
+
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, getUrl, null,
+                response -> {
+                    try {
+                        user.setId(response.getString("id"));
+                        user.setUsername(response.getString("name"));
+                        user.setImageURL(response.getString("imageURL"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Toast.makeText(MainActivity.this, "User Login: " + user.getUsername(), Toast.LENGTH_SHORT).show();    //TODO usunąć
+                },
+                error -> error.printStackTrace());
+
+        requestQueue.add(jsonObjectRequest);
+
     }
 }
