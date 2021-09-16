@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -56,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+
 public class MessageActivity extends AppCompatActivity {
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
@@ -63,7 +65,6 @@ public class MessageActivity extends AppCompatActivity {
     TextView textView;
     ImageView imageView;
 
-    RecyclerView recyclerView;
     EditText messageEditText;
     ImageButton sendButton;
 
@@ -71,8 +72,6 @@ public class MessageActivity extends AppCompatActivity {
     FirebaseUser firebaseUser;
     DatabaseReference databaseReference;
     Intent intent;
-    FirebaseStorage firebaseStorage;
-    StorageReference storageReference;
     MessageAdapter messageAdapter;
     List<Chat> mChat;
 
@@ -85,30 +84,11 @@ public class MessageActivity extends AppCompatActivity {
     MediaRecorder mediaRecorder;
     private String audioPath;
 
-//    // Requesting permission to RECORD_AUDIO
-//    private boolean permissionToRecordAccepted = false;
-//    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
-//
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        switch (requestCode){
-//            case REQUEST_RECORD_AUDIO_PERMISSION:
-//                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-//                break;
-//        }
-//        if (!permissionToRecordAccepted ) finish();
-//
-//    }
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
-
-        //ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-
 
         imageView = findViewById(R.id.ProfileImageView);
         textView = findViewById(R.id.username);
@@ -119,7 +99,6 @@ public class MessageActivity extends AppCompatActivity {
         //recording voice messages
         recordView = findViewById(R.id.record_view);
         recordButton = findViewById(R.id.record_button);
-
 
         //chatRecyclerView
         chatRecyclerView = findViewById(R.id.recyclerView2);
@@ -145,7 +124,6 @@ public class MessageActivity extends AppCompatActivity {
         userid = intent.getStringExtra("userid");
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         databaseReference = FirebaseDatabase.getInstance().getReference("MyUsers").child(userid);
-        //storageReference = FirebaseStorage.getInstance().getReference();
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -153,13 +131,13 @@ public class MessageActivity extends AppCompatActivity {
                 Users user = snapshot.getValue(Users.class);
                 textView.setText(user.getUsername());
 
-                if(user.getImageURL().equals("default")){
+                if (user.getImageURL().equals("default")) {
                     imageView.setImageResource(R.mipmap.ic_launcher);
-                }else{
+                } else {
                     Glide.with(MessageActivity.this).load(user.getImageURL()).into(imageView);
                 }
 
-                readMessages(firebaseUser.getUid(),userid, user.getImageURL());
+                readMessages(firebaseUser.getUid(), userid, user.getImageURL());
             }
 
             @Override
@@ -172,10 +150,10 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String message = messageEditText.getText().toString();
-                if(!message.equals("")){
-                    sendMessage(firebaseUser.getUid(),userid,message, "text");
-                }else{
-                    Toast.makeText(MessageActivity.this,"Please send a non empty message!", Toast.LENGTH_SHORT).show();
+                if (!message.equals("")) {
+                    sendMessage(firebaseUser.getUid(), userid, message, "TEXT");
+                } else {
+                    Toast.makeText(MessageActivity.this, "Please send a non empty message!", Toast.LENGTH_SHORT).show();
                 }
                 messageEditText.setText("");
             }
@@ -184,18 +162,18 @@ public class MessageActivity extends AppCompatActivity {
         initView();
     }
 
-    private void sendRecordingMessage(String sender, String receiver, String audioPath, String type){
-        StorageReference filePath = FirebaseStorage.getInstance().getReference("/Records/");
+    private void sendRecordingMessage(String sender, String receiver, String audioPath, String type) {
+        StorageReference filePath = FirebaseStorage.getInstance().getReference("/Records/" + System.currentTimeMillis() + ".3gp");
         Uri audioFile = Uri.fromFile(new File(audioPath));
         filePath.putFile(audioFile).addOnSuccessListener(taskSnapshot -> {
             Task<Uri> audioUrl = taskSnapshot.getStorage().getDownloadUrl();
 
             audioUrl.addOnCompleteListener(task -> {
-                if(task.isSuccessful()){
+                if (task.isSuccessful()) {
                     String url = task.getResult().toString();
                     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
                     HashMap<String, Object> hashMap = new HashMap<>();
-                    hashMap.put("sender",sender);
+                    hashMap.put("sender", sender);
                     hashMap.put("receiver", receiver);
                     hashMap.put("message", url);
                     hashMap.put("type", type);
@@ -209,7 +187,7 @@ public class MessageActivity extends AppCompatActivity {
                     chatReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(!snapshot.exists()){
+                            if (!snapshot.exists()) {
                                 chatReference.child("id").setValue(userid);
                             }
                         }
@@ -224,10 +202,10 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-    private void sendMessage(String sender, String receiver, String message, String type){
+    private void sendMessage(String sender, String receiver, String message, String type) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("sender",sender);
+        hashMap.put("sender", sender);
         hashMap.put("receiver", receiver);
         hashMap.put("message", message);
         hashMap.put("type", type);
@@ -242,7 +220,7 @@ public class MessageActivity extends AppCompatActivity {
         chatReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(!snapshot.exists()){
+                if (!snapshot.exists()) {
                     chatReference.child("id").setValue(userid);
                 }
             }
@@ -255,7 +233,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
 
-    private void readMessages(String myId, String userId, String imageUrl){
+    private void readMessages(String myId, String userId, String imageUrl) {
         mChat = new ArrayList<>();
 
         databaseReference = FirebaseDatabase.getInstance().getReference("Chats");
@@ -282,31 +260,30 @@ public class MessageActivity extends AppCompatActivity {
     }
 
 
-
-
     public void setSupportActionBar(Toolbar toolbar) {
 
     }
 
-    private boolean isRecordingOk(Context context){
+    private boolean isRecordingOk(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void requestRecording(Activity activity){
+    private void requestRecording(Activity activity) {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_PERMISSION);
     }
 
-    private void initView(){
+
+    private void initView() {
         recordButton.setRecordView(recordView);
         recordButton.setListenForRecord(false);
 
 
 //        recordButton.setOnClickListener(v -> {
-            if(isRecordingOk(MessageActivity.this)){
-                recordButton.setListenForRecord(true);
-            }else{
-                requestRecording(MessageActivity.this);
-            }
+        if (isRecordingOk(MessageActivity.this)) {
+            recordButton.setListenForRecord(true);
+        } else {
+            requestRecording(MessageActivity.this);
+        }
 //        });
 
         recordView.setOnRecordListener(new OnRecordListener() {
@@ -334,7 +311,7 @@ public class MessageActivity extends AppCompatActivity {
                 mediaRecorder.release();
                 File file = new File(audioPath);
 
-                if(file.exists()){
+                if (file.exists()) {
                     file.delete();
                 }
                 recordView.setVisibility(View.GONE);
@@ -348,14 +325,14 @@ public class MessageActivity extends AppCompatActivity {
                 Log.d("RecordView", "onFinish");
 
                 mediaRecorder.reset();
+                //mediaRecorder.stop();
                 mediaRecorder.release();
 
                 recordView.setVisibility(View.GONE);
                 messageEditText.setVisibility(View.VISIBLE);
 
 
-                sendRecordingMessage(firebaseUser.getUid(),userid,audioPath, "recording");
-
+                sendRecordingMessage(firebaseUser.getUid(), userid, audioPath, "RECORDING");
             }
 
             @Override
@@ -367,7 +344,7 @@ public class MessageActivity extends AppCompatActivity {
                 mediaRecorder.release();
 
                 File file = new File(audioPath);
-                if(file.exists()){
+                if (file.exists()) {
                     file.delete();
                 }
 
@@ -377,18 +354,19 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-    private void setUpRecording(){
+    private void setUpRecording() {
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
 
-        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
-        if(!file.exists()){
-            file.mkdirs();
+        boolean result = false;
+        File file = new File(this.getFilesDir(), "MessengerRecords");
+        if (!file.exists()) {
+            result = file.mkdirs();
         }
+        System.out.println(file.getAbsolutePath() + " Result: " + result);
         audioPath = file.getAbsolutePath() + File.separator + System.currentTimeMillis() + ".3gp";
         mediaRecorder.setOutputFile(audioPath);
     }
-
 }
