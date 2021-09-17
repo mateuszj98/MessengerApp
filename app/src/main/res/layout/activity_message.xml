@@ -45,6 +45,7 @@
 
     <RelativeLayout
         android:id="@+id/bottom"
+        android:background="@color/gray"
         android:layout_width="411dp"
         android:layout_height="50dp"
         android:padding="5dp"
