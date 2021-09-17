@@ -25,6 +25,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 //This class displays recent chats with users
 public class ChatsFragment extends Fragment {
@@ -64,7 +66,7 @@ public class ChatsFragment extends Fragment {
         volleyGetChats(MainActivity.API_URL + String.format("/chatRoom/%s", loggedUser.getId()));
     }
 
-    private void showChatList2() {
+    private void showChatList() {
         mUsers.clear();
         volleyGetUsers(MainActivity.API_URL + "/api/user-all");
     }
@@ -85,7 +87,7 @@ public class ChatsFragment extends Fragment {
                             JSONException e) {
                         e.printStackTrace();
                     }
-                    showChatList2();
+                    showChatList();
                 },
                 error -> error.printStackTrace());
 
@@ -124,9 +126,11 @@ public class ChatsFragment extends Fragment {
 
     private void filterUsers() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            chatLists.forEach(chatList -> {
-                mUsers.removeIf(s -> !s.getId().equals(chatList.getId()));
-            });
+            final ArrayList<Users> filteredUsers = new ArrayList<>();
+
+            mUsers = mUsers.stream().filter(o -> {
+                return chatLists.stream().anyMatch(ch -> ch.getId().equals(o.getId()));
+            }).collect(Collectors.toList());
         }
 
     }
