@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="8dp"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:id="@+id/profile_image"
+        android:src="@mipmap/ic_launcher" />
+
+    <me.jagar.chatvoiceplayerlibrary.VoicePlayerView
+        android:layout_toRightOf="@+id/profile_image"
+        android:id="@+id/voicePlayerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:enableVisualizer="true"
+        app:playPauseBackgroundColor="@color/colorAccent"
+        app:playPauseCornerRadius="100"
+        app:playProgressbarColor="@color/colorAccent"
+        app:progressTimeColor="@color/white"
+        app:seekBarProgressColor="#000"
+        app:seekBarThumbColor="@color/colorAccent"
+        app:shareCornerRadius="100"
+        app:showShareButton="false"
+        app:showTiming="true"
+        app:viewBackground="@color/colorPrimary"
+        app:viewCornerRadius="100"
+        app:visualizationNotPlayedColor="@color/colorAccent"
+        app:visualizationPlayedColor="@color/colorAccent" />
+
+
+</RelativeLayout>

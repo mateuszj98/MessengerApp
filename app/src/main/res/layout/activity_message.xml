@@ -6,33 +6,40 @@
     android:layout_height="match_parent"
     tools:context=".MessageActivity">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar2" />
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
+        android:background="@color/gray"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        >
 
         <ImageView
             android:id="@+id/ProfileImageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             app:srcCompat="@mipmap/ic_launcher"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="31dp" />
+            android:layout_marginRight="5dp"/>
 
         <TextView
             android:id="@+id/username"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView"
-            tools:layout_editor_absoluteX="88dp"
-            tools:layout_editor_absoluteY="26dp" />
+            android:layout_height="wrap_content" />
 
     </androidx.appcompat.widget.Toolbar>
 
@@ -40,7 +47,6 @@
         android:id="@+id/bottom"
         android:layout_width="411dp"
         android:layout_height="50dp"
-        android:background="#fff"
         android:padding="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -48,9 +54,8 @@
 
         <EditText
             android:id="@+id/textSend"
-            android:layout_width="311dp"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
+            android:layout_width="312dp"
+            android:layout_height="match_parent"
             android:background="@android:color/transparent"
             android:hint="Type a message" />
 
@@ -58,10 +63,19 @@
         <com.devlomi.record_view.RecordView
             android:id="@+id/record_view"
             android:layout_width="312dp"
-            android:layout_height="43dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginEnd="3dp"
-            android:layout_marginRight="3dp"
+            android:layout_height="20dp"
+            android:layout_alignStart="@+id/textSend"
+            android:layout_alignLeft="@+id/textSend"
+            android:layout_alignTop="@+id/textSend"
+            android:layout_alignBottom="@+id/textSend"
+            android:layout_marginStart="1dp"
+            android:layout_marginLeft="1dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_marginBottom="5dp"
+            android:layout_toStartOf="@+id/record_button"
+            android:layout_toLeftOf="@+id/record_button"
             app:counter_time_color="#ff0000"
             app:slide_to_cancel_arrow="@drawable/recv_ic_arrow"
             app:slide_to_cancel_arrow_color="#000000"
@@ -73,8 +87,12 @@
             android:id="@+id/record_button"
             android:layout_width="38dp"
             android:layout_height="40dp"
+            android:layout_alignBottom="@+id/textSend"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="6dp"
             android:layout_marginRight="6dp"
+            android:layout_marginBottom="-1dp"
             android:layout_toStartOf="@+id/btnSend"
             android:layout_toLeftOf="@+id/btnSend"
             android:background="@android:color/black"
@@ -85,27 +103,17 @@
             android:id="@+id/btnSend"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_alignBottom="@+id/textSend"
+            android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="2dp"
             android:layout_marginRight="2dp"
-            android:background="@drawable/send_icon"
-            android:contentDescription="TODO" />
-
+            android:layout_marginBottom="-1dp"
+            android:background="@drawable/send_icon"/>
 
     </RelativeLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView2"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar2" />
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -54,5 +54,6 @@ dependencies {
 
     //RecordView for voice messages
     implementation 'com.devlomi.record-view:record-view:2.0.1'
+    implementation "com.github.JagarYousef:ChatVoicePlayer:1.0.7"
 
 }
