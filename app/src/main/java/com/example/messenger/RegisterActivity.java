@@ -90,9 +90,9 @@ public class RegisterActivity extends AppCompatActivity {
                     //JSON object for API
                     JSONObject jsonObject = new JSONObject();
                     try {
-                        //jsonObject.put("id", userid);
+                        jsonObject.put("id", userid);
                         jsonObject.put("name", username);
-                        //jsonObject.put("imageURL", "default");
+                        jsonObject.put("imageURL", "default");
 
                     } catch (JSONException e) {
                         e.printStackTrace();
