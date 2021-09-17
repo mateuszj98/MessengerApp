@@ -26,7 +26,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 //This class displays recent chats with users
 public class ChatsFragment extends Fragment {
@@ -40,6 +39,9 @@ public class ChatsFragment extends Fragment {
 
     public ChatsFragment(Users loggedUser) {
         this.loggedUser = loggedUser;
+    }
+
+    public ChatsFragment() {
     }
 
     @Override

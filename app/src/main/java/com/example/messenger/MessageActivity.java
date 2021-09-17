@@ -1,9 +1,5 @@
 package com.example.messenger;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -13,9 +9,6 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.ContactsContract;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -24,12 +17,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.devlomi.record_view.OnRecordListener;
 import com.devlomi.record_view.RecordButton;
@@ -37,8 +37,6 @@ import com.devlomi.record_view.RecordView;
 import com.example.messenger.Adapter.MessageAdapter;
 import com.example.messenger.Model.Chat;
 import com.example.messenger.Model.Users;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -49,7 +47,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -181,22 +178,7 @@ public class MessageActivity extends AppCompatActivity {
                     databaseReference.child("Chats").push().setValue(hashMap);
 
                     //Adding User to chat fragment: Latest Chats with contacts
-
-                    final DatabaseReference chatReference = FirebaseDatabase.getInstance().getReference("ChatList").child(firebaseUser.getUid()).child(userid);
-
-                    chatReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (!snapshot.exists()) {
-                                chatReference.child("id").setValue(userid);
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
+                    volleyPost(MainActivity.API_URL + "/chatRoom/new", sender, receiver);
                 }
             });
         });
@@ -214,22 +196,7 @@ public class MessageActivity extends AppCompatActivity {
         databaseReference.child("Chats").push().setValue(hashMap);
 
         //Adding User to chat fragment: Latest Chats with contacts
-
-        final DatabaseReference chatReference = FirebaseDatabase.getInstance().getReference("ChatList").child(firebaseUser.getUid()).child(userid);
-
-        chatReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (!snapshot.exists()) {
-                    chatReference.child("id").setValue(userid);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        volleyPost(MainActivity.API_URL + "/chatRoom/new", sender, receiver);
     }
 
 
@@ -368,5 +335,22 @@ public class MessageActivity extends AppCompatActivity {
         System.out.println(file.getAbsolutePath() + " Result: " + result);
         audioPath = file.getAbsolutePath() + File.separator + System.currentTimeMillis() + ".3gp";
         mediaRecorder.setOutputFile(audioPath);
+    }
+
+    private void volleyPost(String postUrl, String senderId, String recipientId) {
+        String parameters = String.format("?recipientId=%1$s&senderId=%2$s", recipientId, senderId);
+        postUrl += parameters;
+
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest jsonObjectRequest = new StringRequest(Request.Method.POST, postUrl,
+                response -> {
+                    System.out.println(response);
+                },
+                error -> {
+                    error.printStackTrace();
+                });
+
+        requestQueue.add(jsonObjectRequest);
+
     }
 }
