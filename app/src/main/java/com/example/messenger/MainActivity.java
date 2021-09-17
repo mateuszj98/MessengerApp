@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String API_URL = "https://messenger-backend2137.herokuapp.com";
     //Firebase
     FirebaseUser firebaseUser;
-    Users user = new Users();
+    Users loggedUser = new Users();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +43,8 @@ public class MainActivity extends AppCompatActivity {
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         assert firebaseUser != null;
-        volleyGetUser(MainActivity.API_URL + "/api/user", firebaseUser.getUid());
+        loggedUser.setId(firebaseUser.getUid());
+        volleyGetUser(MainActivity.API_URL + "/api/user", loggedUser.getId());
 
         //Tab Layout and viewPager
         TabLayout tabLayout = findViewById(R.id.tabLayout);
@@ -51,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
 
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
-        viewPagerAdapter.addFragment(new ChatsFragment(), "Chats");
-        viewPagerAdapter.addFragment(new UsersFragment(user), "Users");
+        viewPagerAdapter.addFragment(new ChatsFragment(loggedUser), "Chats");
+        viewPagerAdapter.addFragment(new UsersFragment(loggedUser), "Users");
 
         viewPager.setAdapter(viewPagerAdapter);
 
@@ -60,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Logout functionality
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -123,13 +123,13 @@ public class MainActivity extends AppCompatActivity {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, getUrl, null,
                 response -> {
                     try {
-                        user.setId(response.getString("id"));
-                        user.setUsername(response.getString("name"));
-                        user.setImageURL(response.getString("imageURL"));
+                        loggedUser.setId(response.getString("id"));
+                        loggedUser.setUsername(response.getString("name"));
+                        loggedUser.setImageURL(response.getString("imageURL"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    Toast.makeText(MainActivity.this, "User Login: " + user.getUsername(), Toast.LENGTH_SHORT).show();    //TODO usunąć
+                    Toast.makeText(MainActivity.this, "User Login: " + loggedUser.getUsername(), Toast.LENGTH_SHORT).show();    //TODO usunąć
                 },
                 error -> error.printStackTrace());
 

@@ -1,5 +1,6 @@
 package com.example.messenger.Fragments;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -20,6 +21,8 @@ import com.example.messenger.Adapter.UserAdapter;
 import com.example.messenger.MainActivity;
 import com.example.messenger.Model.Users;
 import com.example.messenger.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,8 +38,9 @@ public class UsersFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private UserAdapter userAdapter;
-    private List<Users> mUsers = new ArrayList<>();;
+    private List<Users> mUsers = new ArrayList<>();
     private Users loggedUser;
+    private FirebaseUser firebaseUser;
 
     public UsersFragment() {
         // Required empty public constructor
@@ -54,7 +58,7 @@ public class UsersFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         return view;
         //return inflater.inflate(R.layout.fragment_users,container,false);
@@ -73,35 +77,35 @@ public class UsersFragment extends Fragment {
         readUsers();
     }
 
-    private void readUsers(){
+    private void readUsers() {
         mUsers.clear();
-        volleyGetUsers(MainActivity.API_URL+ "/api/user-all");
+        volleyGetUsers(MainActivity.API_URL + "/api/user-all");
     }
 
     private void volleyGetUsers(String getUrl) {
 
         RequestQueue requestQueue = Volley.newRequestQueue(requireContext());
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, getUrl, null,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        try {
-                            for(int i = 0; i < response.length(); i++){
-                                JSONObject jsonObject = response.getJSONObject(i);
-                                final Users user = new Users(
-                                        jsonObject.getString("id"),
-                                        jsonObject.getString("name"),
-                                        jsonObject.getString("imageURL"));
+                response -> {
+                    try {
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject jsonObject = response.getJSONObject(i);
+                            final Users user = new Users(
+                                    jsonObject.getString("id"),
+                                    jsonObject.getString("name"),
+                                    jsonObject.getString("imageURL"));
 
-                                mUsers.add(user);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            mUsers.add(user);
                         }
-                        mUsers.remove(loggedUser);
-                        userAdapter = new UserAdapter(getContext(), mUsers);
-                        recyclerView.setAdapter(userAdapter);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
+                    //mUsers.remove(loggedUser);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        mUsers.removeIf(u -> u.getId().equals(firebaseUser.getUid()));
+                    }
+                    userAdapter = new UserAdapter(getContext(), mUsers);
+                    recyclerView.setAdapter(userAdapter);
                 },
                 error -> error.printStackTrace());
 
