@@ -40,7 +40,6 @@ public class UsersFragment extends Fragment {
     private UserAdapter userAdapter;
     private List<Users> mUsers = new ArrayList<>();
     private Users loggedUser;
-    private FirebaseUser firebaseUser;
 
     public UsersFragment() {
         // Required empty public constructor
@@ -58,7 +57,6 @@ public class UsersFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         return view;
         //return inflater.inflate(R.layout.fragment_users,container,false);
@@ -100,9 +98,9 @@ public class UsersFragment extends Fragment {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    //mUsers.remove(loggedUser);
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        mUsers.removeIf(u -> u.getId().equals(firebaseUser.getUid()));
+                        mUsers.removeIf(u -> u.getId().equals(loggedUser.getId()));
                     }
                     userAdapter = new UserAdapter(getContext(), mUsers);
                     recyclerView.setAdapter(userAdapter);

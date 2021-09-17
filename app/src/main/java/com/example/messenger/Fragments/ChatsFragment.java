@@ -2,38 +2,24 @@ package com.example.messenger.Fragments;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.messenger.Adapter.UserAdapter;
 import com.example.messenger.MainActivity;
 import com.example.messenger.Model.ChatList;
 import com.example.messenger.Model.Users;
 import com.example.messenger.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,8 +33,6 @@ public class ChatsFragment extends Fragment {
     private List<Users> mUsers = new ArrayList<>();
     private List<ChatList> chatLists = new ArrayList<>();
     private Users loggedUser;
-
-    FirebaseUser firebaseUser;
 
     RecyclerView recyclerView;
 
@@ -64,7 +48,6 @@ public class ChatsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView3);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         return view;
     }
@@ -78,7 +61,7 @@ public class ChatsFragment extends Fragment {
 
     private void readChats() {
         chatLists.clear();
-        volleyGetChats(MainActivity.API_URL + String.format("/chatRoom/%s", firebaseUser.getUid()));
+        volleyGetChats(MainActivity.API_URL + String.format("/chatRoom/%s", loggedUser.getId()));
     }
 
     private void showChatList2() {
